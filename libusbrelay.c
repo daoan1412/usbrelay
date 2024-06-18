@@ -57,7 +57,7 @@ int enumerate_relay_boards(const char *product, int verbose, int debug)
 	if(relay_board_count){
 		relay_board_count = 0;
 		if (relay_boards)
-			shutdown();
+			relay_shutdown();
 	}
 	//Enumerate all HID USB devices 
 	devs = hid_enumerate(0, 0);
@@ -362,7 +362,7 @@ relay_board *get_relay_boards()
 /**
  * Return all allocated resources and perform any other cleanup
  */
-void shutdown()
+void relay_shutdown()
 {
 
 	/* Free static HIDAPI objects. */

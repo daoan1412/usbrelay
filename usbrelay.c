@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	shutdown();
+	relay_shutdown();
 
 	for (i = 1; i < (argc - optind); i++) {
 		if (args.debug)

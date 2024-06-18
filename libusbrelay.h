@@ -55,7 +55,7 @@ int set_serial(const char *path,char *newserial,int debug);
 relay_board *find_board(const char *serial,int debug);
 int get_relay_board_count(void);
 relay_board* get_relay_boards(void);
-void shutdown(void);
+void relay_shutdown(void);
 const char *libusbrelay_version(void);
 
 
