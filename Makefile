@@ -7,15 +7,16 @@ __BINDIR ?= $(PREFIX)/bin
 INCLUDEDIR ?= ${PREFIX}/include
 PKGCONFDIR ?= ${LIBDIR}/pkgconfig
 
-all: usbrelay libusbrelay.so libusbrelay.pc
+all: usbrelay libusbrelay.a libusbrelay.pc
 
-libusbrelay.so: libusbrelay.c libusbrelay.h 
-	$(CC) -shared -fPIC -Wl,-soname,$@.$(USBMAJOR) $(CPPFLAGS) $(CFLAGS)  $< $(LDFLAGS) -o $@.$(USBLIBVER) $(LDLIBS)
-	$(LDCONFIG) -n .
-	ln -sr libusbrelay.so.$(USBLIBVER) libusbrelay.so
+libusbrelay.a: libusbrelay.o
+	ar rcs $@ $^
 
-usbrelay: usbrelay.c libusbrelay.h libusbrelay.so
-	$(CC) $(CPPFLAGS) $(CFLAGS)  $< -l:libusbrelay.so.$(USBLIBVER) -L./ $(LDFLAGS) -o $@ $(LDLIBS)
+libusbrelay.o: libusbrelay.c libusbrelay.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+
+usbrelay: usbrelay.c libusbrelay.h libusbrelay.a
+	$(CC) $(CPPFLAGS) $(CFLAGS)  $< -l:libusbrelay.a -L./ $(LDFLAGS) -o $@ $(LDLIBS)
 
 python:
 	$(MAKE) -C usbrelay_py
@@ -52,29 +53,15 @@ libusbrelay.pc:
 	echo "Libs: -L${LIBDIR} -lusbrelay" >> libusbrelay.pc
 	echo "Cflags: -I${INCLUDEDIR}" >> libusbrelay.pc
 
-clean:
-	rm -f usbrelay
-	rm -f libusbrelay.so.$(USBLIBVER)
-	rm -f libusbrelay.so*
-	rm -f gitversion.h
-	rm -f libusbrelay.pc
-	$(MAKE) -C usbrelay_py clean
-
-
-install: usbrelay libusbrelay.so libusbrelay.pc
-	install -d $(DESTDIR)$(LIBDIR)
-	install -m 0755 libusbrelay.so.$(USBLIBVER) $(DESTDIR)$(LIBDIR)
-	$(LDCONFIG) -n $(DESTDIR)$(LIBDIR)
-	( cd $(DESTDIR)$(LIBDIR); rm -f libusbrelay.so ;ln -sr libusbrelay.so.$(USBLIBVER) libusbrelay.so )
-	install -d $(DESTDIR)$(__BINDIR)
-	install -m 0755 usbrelay $(DESTDIR)$(__BINDIR)
-	install -d $(DESTDIR)$(INCLUDEDIR)
+install: usbrelay libusbrelay.a libusbrelay.pc
+	install -m 0755 usbrelay ${DESTDIR}${__BINDIR}
+	install -m 0755 libusbrelay.a ${DESTDIR}${LIBDIR}
 	install -m 0644 libusbrelay.h ${DESTDIR}${INCLUDEDIR}
-	install -d $(DESTDIR)$(PKGCONFDIR)
+	mkdir -p ${DESTDIR}$(PKGCONFDIR)
 	install -m 0644 libusbrelay.pc ${DESTDIR}${PKGCONFDIR}
 
 remove:
-	\rm $(DESTDIR)$(LIBDIR)/libusbrelay.so*
+	\rm $(DESTDIR)$(LIBDIR)/libusbrelay.a*
 	\rm $(DESTDIR)$(PREFIX)/bin/usbrelay
 	\rm $(DESTDIR)$(INCLUDEDIR)/libusbrelay.h
 	\rm $(DESTDIR)$(PKGCONFDIR)/libusbrelay.pc

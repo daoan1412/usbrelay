@@ -7,3 +7,6 @@ usbrelay
 *.egg-info
 
 .vscode/tasks.json
+libusbrelay.a
+libusbrelay.o
+libusbrelay.pc
